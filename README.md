@@ -16,3 +16,8 @@ recipe -> entity
 3. How are we going to clean it
 4. Can we automate
 4(5). How do we automate it
+
+Systems:
+1. Data Pipeline
+2. AWS Lex + Lambda Functions
+3. Frontend Website
