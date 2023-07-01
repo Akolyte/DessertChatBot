@@ -21,3 +21,10 @@ Systems:
 1. Data Pipeline
 2. AWS Lex + Lambda Functions
 3. Frontend Website
+
+## Problem 1: Getting a list with every dessert recipe url at allrecipes.com
+
+Issues:
+1.
+  Problem: Recipe categories are nested, and are also repeated at different levels of nesting.
+  Solution: Retain a set of recipe categories, and exit early if the recipe category has already been covered. 
