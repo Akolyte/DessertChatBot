@@ -3,10 +3,14 @@ import re
 from bs4 import BeautifulSoup
 
 def cook_soup(URL):
+    timeout = 10
     try:
-        response = requests.get(URL)
+        response = requests.get(URL, timeout=timeout)
         soup = BeautifulSoup(response.content, "html.parser")
         return soup
+    
+    except requests.exceptions.Timeout:
+        print(f"Request timed out after {timeout} seconds.")
         
     except requests.RequestException as e:
         print('Request failed:', str(e))
@@ -27,29 +31,31 @@ def find_category_name(soup):
     element = soup.find(class_=class_pattern)
     return element.text
 
+def get_nonnested_links(current_layer, visited, nonnested):
+    for link in current_layer:
+        if link in visited:
+            continue
+        visited.add(link)
+        soup = cook_soup(link)
+        child_links = find_links(soup)
+
+        if not child_links:
+            nonnested.add(link)
+        
+        else:
+            get_nonnested_links(child_links, visited, nonnested)
+
+    return visited, nonnested
+
+#TODO loop through all nonnested links and get all recipes, make a list of recipe links
+
 def main():
     URL = "https://www.allrecipes.com/recipes/79/desserts/"
-    soup = cook_soup(URL)
-    top_layer_links = find_links(soup)
-    category_dict = {}
-    categories = set()
-    
-    for link in top_layer_links:
-        new_soup = cook_soup(link)
-        next_layer_title = find_category_name(new_soup)
-        next_layer_links = find_links(new_soup)
-        print(next_layer_title,next_layer_links)
+    _,nonnested = get_nonnested_links([URL], set(), set())
+    with open('nonnested_links.txt', 'w', encoding = "utf-8") as file:
+        for link in nonnested:
+            file.write(link)
+    print("done")
 
-        while not next_layer_links:
-            for child_link in next_layer_links:
-                mini_soup = cook_soup(next_layer_links)
-                if mini_soup != None:
-                    next_layer_title = find_category_name(mini_soup)
-                    next_layer_links = find_links(mini_soup)
-                    break
-                else:
-                    continue
-            break    
-    
 if __name__ == "__main__":
     main()
