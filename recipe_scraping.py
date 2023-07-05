@@ -38,6 +38,6 @@ def main():
             file.write(f"{link}\n")
 
         print("done")
-#TODO: 
+
 if __name__ == "__main__":
     main()
