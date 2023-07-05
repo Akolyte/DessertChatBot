@@ -19,7 +19,6 @@ def find_links(soup):
     id_pattern = re.compile(r'mntl-card-list-items')
     elements = soup.find_all(id=id_pattern)
     links = []
-    
     for element in elements:
         links.append(element.get('href'))
     return links
@@ -39,6 +38,6 @@ def main():
             file.write(f"{link}\n")
 
         print("done")
-
+#TODO: 
 if __name__ == "__main__":
     main()
