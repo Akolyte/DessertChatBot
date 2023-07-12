@@ -68,13 +68,12 @@ def find_ingredients(soup):
 def main():
     recipe_dic = {}
     with open('recipe_links.txt', 'r', encoding = "utf-8") as file:
-       lines = file.readlines()
-       for line in lines:
-           soup = cook_soup(line.strip())
-           recipe_title = find_recipe_title(soup)
-           find_ingredients(soup)
-
-           recipe_dic[recipe_title] = {}
+        lines = file.readlines()
+        for line in lines:
+            soup = cook_soup(line.strip())
+            recipe_title = find_recipe_title(soup)
+            find_ingredients(soup)
+            recipe_dic[recipe_title] = {}
        
 if __name__ == "__main__":
     main()
