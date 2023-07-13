@@ -31,7 +31,7 @@ def main():
             soup = cook_soup(line.strip())
             current_recipe_links = find_links(soup)
             recipe_links += current_recipe_links
-            print(recipe_links)
+            
 
     with open('recipe_links.txt', 'w', encoding = "utf-8") as file:
         for link in recipe_links:
