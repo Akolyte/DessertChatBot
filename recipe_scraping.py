@@ -3,11 +3,14 @@ import requests
 import re
 from bs4 import BeautifulSoup
 
+#TODO: Get recipe directions
+#TODO: Write MongoDB
+
 def main():
     recipe_dict = {}
     with open('recipe_links.txt', 'r', encoding = "utf-8") as file:
         lines = file.readlines()
-        counter = 0
+
         for line in lines:
             soup = cook_soup(line.strip())
             if not is_recipe(soup):
@@ -15,12 +18,11 @@ def main():
             else:
                 #{recipe name: {ingredients: {} , directions: {}}}
                 #{recipe name: {ingredients1: {} ,ingredients2: {} , directions: {}}}
-                recipe_title = find_recipe_title(soup)
+                recipe_title = find_recipe_title(soup).strip()
                 print(recipe_title)
                 recipe_dict[recipe_title] = find_ingredients(soup)
-            counter += 1
-            if counter == 20:
-                break
+   
+           
     file_path = "ingredients.json"
 
     # Open the file in write mode
@@ -52,17 +54,17 @@ def find_recipe_title(soup):
     return element.text
 
 def find_ingredients(soup):
-    class_pattern = re.compile(r'mntl-structured-ingredients__')
-    elements = soup.find_all('h2',class_=class_pattern)
+    class_pattern = re.compile(r'mntl-structured-ingredients__list-heading')
+    subheadings = soup.find_all('p',class_=class_pattern)
     
-    if elements:
-        ingredients_dict = find_ingredients_with_multiple_sub_recipes(soup)
+    if subheadings:
+        ingredients_dict = find_ingredients_with_multiple_sub_recipes(soup,subheadings)
+        
     else:
         ingredients_dict = find_ingredients_with_one_recipe(soup)
-
     return ingredients_dict
 
-def find_ingredients_with_multiple_sub_recipes(soup):
+def find_ingredients_with_multiple_sub_recipes(soup,subheadings):
     ul_pattern = re.compile(r"mntl-structured-ingredients__list")
     ingredient_pattern = re.compile(r"mntl-structured-ingredients__list-item")
     sub_ingredients_dict = {}
@@ -76,10 +78,13 @@ def find_ingredients_with_multiple_sub_recipes(soup):
             ingredients_part_dict['unit'] = get_unit(ingredient)
             ingredients_part_dict['ingredient_name'] = get_ingredient_name(ingredient)
             ingredients_dict[index] = ingredients_part_dict
+        
+        if index_ul == 0:
+            sub_ingredients_dict['Ingredients'] = ingredients_dict
+        else:
+            sub_ingredients_dict[subheadings[index_ul-1].text] = ingredients_dict
 
-        sub_ingredients_dict[index_ul] = ingredients_dict
-
-    return ingredients_dict
+    return sub_ingredients_dict
 
 def find_ingredients_with_one_recipe(soup):
     ul_pattern = re.compile(r"mntl-structured-ingredients__list")
@@ -100,13 +105,9 @@ def find_ingredients_with_one_recipe(soup):
 def get_quantity(ingredient):
     quantity_span = ingredient.find('span',attrs={"data-ingredient-quantity":"true"})
     if quantity_span:
-        return convert_unicode_to_fraction(quantity_span.text)
+        return quantity_span.text
     else:
         return None
-    
-def convert_unicode_to_fraction(fraction):
-    fraction_dict = {}
-    print(fraction)
 
 def get_unit(ingredient):
     unit_span = ingredient.find('span',attrs={"data-ingredient-unit":"true"})
