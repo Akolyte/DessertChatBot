@@ -8,10 +8,9 @@ def cook_soup(URL):
         response = requests.get(URL, timeout=timeout)
         soup = BeautifulSoup(response.content, "html.parser")
         return soup
-    
     except requests.exceptions.Timeout:
         print(f"Request timed out after {timeout} seconds.")
-        
+
     except requests.RequestException as e:
         print('Request failed:', str(e))
         return None
@@ -21,7 +20,7 @@ def find_links(soup):
     class_pattern = re.compile(r'taxonomy-nodes__link mntl-text-link type--squirrel-link')
     elements = soup.find_all(class_=class_pattern)
     links = []
-    
+
     for element in elements:
         links.append(element.get('href'))
     return links
@@ -41,13 +40,11 @@ def get_nonnested_links(current_layer, visited, nonnested):
 
         if not child_links:
             nonnested.add(link)
-        
+
         else:
             get_nonnested_links(child_links, visited, nonnested)
 
     return visited, nonnested
-
-#TODO loop through all nonnested links and get all recipes, make a list of recipe links
 
 def main():
     URL = "https://www.allrecipes.com/recipes/79/desserts/"

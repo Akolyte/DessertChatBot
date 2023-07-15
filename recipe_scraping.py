@@ -1,6 +1,34 @@
+import json
 import requests
 import re
 from bs4 import BeautifulSoup
+
+def main():
+    recipe_dict = {}
+    with open('recipe_links.txt', 'r', encoding = "utf-8") as file:
+        lines = file.readlines()
+        counter = 0
+        for line in lines:
+            soup = cook_soup(line.strip())
+            if not is_recipe(soup):
+                continue
+            else:
+                #{recipe name: {ingredients: {} , directions: {}}}
+                #{recipe name: {ingredients1: {} ,ingredients2: {} , directions: {}}}
+                recipe_title = find_recipe_title(soup)
+                print(recipe_title)
+                recipe_dict[recipe_title] = find_ingredients(soup)
+            counter += 1
+            if counter == 20:
+                break
+    file_path = "ingredients.json"
+
+    # Open the file in write mode
+    with open(file_path, "w") as json_file:
+        # Write the dictionary to the file in JSON format
+        json.dump(recipe_dict, json_file)
+
+    print("Dictionary written to JSON file successfully.")
 
 def cook_soup(URL):
     timeout = 10
@@ -14,6 +42,10 @@ def cook_soup(URL):
         print('Request failed:', str(e))
         return None
     
+def is_recipe(soup):
+    not_recipe_pattern = re.compile(r"mntl-attribution__item-descriptor")
+    return soup.find('span',not_recipe_pattern).text.strip() == "Recipe by"
+    
 def find_recipe_title(soup):
     id_pattern = re.compile(r'article-heading_1-0')
     element = soup.find(id=id_pattern)
@@ -21,86 +53,74 @@ def find_recipe_title(soup):
 
 def find_ingredients(soup):
     class_pattern = re.compile(r'mntl-structured-ingredients__')
-    #previous class pattern mntl-structured-ingredients__list-heading
-    #comp mntl-structured-ingredients__heading mntl-text-block
     elements = soup.find_all('h2',class_=class_pattern)
+    
+    if elements:
+        ingredients_dict = find_ingredients_with_multiple_sub_recipes(soup)
+    else:
+        ingredients_dict = find_ingredients_with_one_recipe(soup)
 
+    return ingredients_dict
+
+def find_ingredients_with_multiple_sub_recipes(soup):
     ul_pattern = re.compile(r"mntl-structured-ingredients__list")
     ingredient_pattern = re.compile(r"mntl-structured-ingredients__list-item")
-    #recipe_title_dict = {}
-    ingredients_dict = {}
-
-    #{recipe name: {ingredients: {} , directions: {}}}
-    #{recipe name: {ingredients1: {} ,ingredients2: {} , directions: {}}}
-    if elements:
-        ul_elements = soup.find_all('ul',class_=ul_pattern)
-        for ul_element in ul_elements:
-            ingredients = ul_element.find_all('li',class_ = ingredient_pattern)
-            for index, ingredient in enumerate(ingredients):
-                if ingredient.find('span',attrs={"data-ingredient-quantity":"true"}):
-                    quantity = ingredient.find('span',attrs={"data-ingredient-quantity":"true"}).text
-                else:
-                    quantity = None
-                if ingredient.find('span',attrs={"data-ingredient-unit":"true"}):
-                    unit = ingredient.find('span',attrs={"data-ingredient-unit":"true"}).text
-                else: 
-                    unit = None
-                if ingredient.find('span',attrs={"data-ingredient-name":"true"}):
-                    ingredient_name = ingredient.find('span',attrs={"data-ingredient-name":"true"}).text
-                else:
-                    ingredient_name = None
-
-                ingredients_part_dict = {}
-                ingredients_part_dict['quantity'] = quantity
-                ingredients_part_dict['unit'] = unit
-                ingredients_part_dict['ingredient_name'] = ingredient_name
-                ingredients_dict[index] = ingredients_part_dict
-    
-    else:
-        ul_element = soup.find(class_=ul_pattern)
-        ingredients = ul_element.find_all(class_ = ingredient_pattern)
-
+    sub_ingredients_dict = {}
+    ul_elements = soup.find_all('ul',class_=ul_pattern)
+    for index_ul, ul_element in enumerate(ul_elements):
+        ingredients = ul_element.find_all('li',class_ = ingredient_pattern)
+        ingredients_dict = {}
         for index, ingredient in enumerate(ingredients):
-            if ingredient.find('span',attrs={"data-ingredient-quantity":"true"}):
-                quantity = ingredient.find('span',attrs={"data-ingredient-quantity":"true"}).text
-            else:
-                quantity = None
-            if ingredient.find('span',attrs={"data-ingredient-unit":"true"}):
-                unit = ingredient.find('span',attrs={"data-ingredient-unit":"true"}).text
-            else: 
-                unit = None
-            if ingredient.find('span',attrs={"data-ingredient-name":"true"}):
-                ingredient_name = ingredient.find('span',attrs={"data-ingredient-name":"true"}).text
-            else:
-                ingredient_name = None
-
             ingredients_part_dict = {}
-            ingredients_part_dict['quantity'] = quantity
-            ingredients_part_dict['unit'] = unit
-            ingredients_part_dict['ingredient_name'] = ingredient_name
+            ingredients_part_dict['quantity'] = get_quantity(ingredient)
+            ingredients_part_dict['unit'] = get_unit(ingredient)
+            ingredients_part_dict['ingredient_name'] = get_ingredient_name(ingredient)
             ingredients_dict[index] = ingredients_part_dict
 
-    return ingredients_dict 
+        sub_ingredients_dict[index_ul] = ingredients_dict
 
-def main():
-    recipe_dict = {}
-    with open('recipe_links.txt', 'r', encoding = "utf-8") as file:
-        lines = file.readlines()
-        for line in lines:
-            soup = cook_soup(line.strip())
-            #<span class="mntl-attribution__item-descriptor">By</span>
-            not_recipe_pattern = re.compile(r"mntl-attribution__item-descriptor")
-            #article_pattern = re.compile(r"mntl-sc-block-featuredlink__link mntl-text-link button--contained-standard type--squirrel")
-            #if (soup.find('a',article_pattern) != None) or ():
-            if soup.find('span',not_recipe_pattern).text.strip() != "Recipe by":
-                continue
-            else:
-                recipe_title = find_recipe_title(soup)
-                print(recipe_title)
-                recipe_dict[recipe_title] = find_ingredients(soup)
-        
+    return ingredients_dict
+
+def find_ingredients_with_one_recipe(soup):
+    ul_pattern = re.compile(r"mntl-structured-ingredients__list")
+    ingredient_pattern = re.compile(r"mntl-structured-ingredients__list-item")
+    ingredients_dict = {}
+    ul_element = soup.find(class_=ul_pattern)
+    ingredients = ul_element.find_all(class_ = ingredient_pattern)
+
+    for index, ingredient in enumerate(ingredients):
+        ingredients_part_dict = {}
+        ingredients_part_dict['quantity'] = get_quantity(ingredient)
+        ingredients_part_dict['unit'] = get_unit(ingredient)
+        ingredients_part_dict['ingredient_name'] = get_ingredient_name(ingredient)
+        ingredients_dict[index] = ingredients_part_dict
+
+    return ingredients_dict
+
+def get_quantity(ingredient):
+    quantity_span = ingredient.find('span',attrs={"data-ingredient-quantity":"true"})
+    if quantity_span:
+        return convert_unicode_to_fraction(quantity_span.text)
+    else:
+        return None
+    
+def convert_unicode_to_fraction(fraction):
+    fraction_dict = {}
+    print(fraction)
+
+def get_unit(ingredient):
+    unit_span = ingredient.find('span',attrs={"data-ingredient-unit":"true"})
+    if unit_span:
+        return unit_span.text
+    else:
+        return None
+
+def get_ingredient_name(ingredient):
+    ingredient_name_span = ingredient.find('span',attrs={"data-ingredient-name":"true"})
+    if ingredient_name_span:
+        return ingredient_name_span.text
+    else:
+        return None
+
 if __name__ == "__main__":
     main()
-
-#TODO Fix multi-dictionary stucture for ingredients
-#TODO Create JSON File from dictionary
