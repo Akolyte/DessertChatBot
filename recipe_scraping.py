@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup
 #TODO: Write MongoDB
 
 def main():
-    recipe_dict = {}
+    recipe_dict = []
     with open('recipe_links.txt', 'r', encoding = "utf-8") as file:
         lines = file.readlines()
 
@@ -20,7 +20,7 @@ def main():
                 #{recipe name: {ingredients1: {} ,ingredients2: {} , directions: {}}}
                 recipe_title = find_recipe_title(soup).strip()
                 print(recipe_title)
-                recipe_dict[recipe_title] = find_ingredients(soup)
+                recipe_dict.append(find_ingredients(soup,recipe_title))
    
            
     file_path = "ingredients.json"
@@ -53,7 +53,7 @@ def find_recipe_title(soup):
     element = soup.find(id=id_pattern)
     return element.text
 
-def find_ingredients(soup):
+def find_ingredients(soup,recipe_title):
     class_pattern = re.compile(r'mntl-structured-ingredients__list-heading')
     subheadings = soup.find_all('p',class_=class_pattern)
     
@@ -62,6 +62,8 @@ def find_ingredients(soup):
         
     else:
         ingredients_dict = find_ingredients_with_one_recipe(soup)
+
+    ingredients_dict['name'] = recipe_title
     return ingredients_dict
 
 def find_ingredients_with_multiple_sub_recipes(soup,subheadings):
