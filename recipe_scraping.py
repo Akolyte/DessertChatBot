@@ -18,7 +18,7 @@ def main():
                 recipe_title = find_recipe_title(soup).strip()
                 print(recipe_title)
                 recipe_list.append(find_ingredients(soup,recipe_title))
-            if count == 30:
+            if count == 15:
                 break
             count +=1
            
@@ -38,7 +38,8 @@ def cook_soup(URL):
         soup = BeautifulSoup(response.content, "html.parser")
         return soup
     except requests.exceptions.Timeout:
-        print(f"Request timed out after {timeout} seconds.")      
+        print(f"Request timed out after {timeout} seconds.")   
+        return cook_soup(URL)       
     except requests.RequestException as e:
         print('Request failed:', str(e))
         return None
@@ -129,7 +130,7 @@ def find_instructions(soup):
     li_element = soup.find_all('li',class_ = li_pattern)
     instructions_dict = {}
     for index,element in enumerate(li_element):
-        instructions_dict[index] = element.text.strip()
+        instructions_dict[index] = element.text.strip().split("\n")[0]
     return instructions_dict
 
 if __name__ == "__main__":
