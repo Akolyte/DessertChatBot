@@ -25,7 +25,7 @@ def main():
     # Open the file in write mode
     with open(file_path, "w") as json_file:
         # Write the dictionary to the file in JSON format
-        json.dump(recipe_dict, json_file)
+        json.dump(recipe_list, json_file)
 
     print("Dictionary written to JSON file successfully.")
 

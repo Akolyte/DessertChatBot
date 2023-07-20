@@ -7,7 +7,6 @@ def main():
     instructions_list = []
     with open('recipe_links.txt', 'r', encoding = "utf-8") as file:
         lines = file.readlines()
-        count = 0
         for line in lines:
             soup = cook_soup(line.strip())
             if not is_recipe(soup):
@@ -16,11 +15,15 @@ def main():
                 recipe_title = find_recipe_title(soup).strip()
                 print(recipe_title)
                 instructions_list.append(find_instructions(soup,recipe_title))
-            count += 1
-            if count == 5:
-                break
         
-        print(instructions_list)
+    file_path = "ingredients.json"
+
+    # Open the file in write mode
+    with open(file_path, "w") as json_file:
+        # Write the dictionary to the file in JSON format
+        json.dump(instructions_list, json_file)
+
+    print("Dictionary written to JSON file successfully.")
 
 def cook_soup(URL):
     timeout = 10
@@ -45,25 +48,14 @@ def find_recipe_title(soup):
 
 def find_instructions(soup,recipe_title):
     li_pattern = re.compile(r'comp mntl-sc-block-group--LI')
-    text_pattern = re.compile(r'comp mntl-sc-block mntl-sc-block-html')
     li_element = soup.find_all('li',class_ = li_pattern)
     recipe_dict = {}
+    instructions_dict = {}
     for index,element in enumerate(li_element):
-        instructions_dict = {}
         index +=1
-        step = element.find(class_ = text_pattern)
-        instructions_dict[f'Step {index}'] = step.text
+        instructions_dict[f'Step {index}'] = element.text.strip()
     recipe_dict[recipe_title] = instructions_dict
     return recipe_dict
-        
-
-"""         steps = element.find_all(class_ = text_pattern)
-            for index,step in enumerate(steps):
-            instructions_dict = {}
-            index +=1
-            instructions_dict[f'Step {index}'] = step.text
-        recipe_dict[recipe_title] = instructions_dict
-    return len(li_element) """
 
 if __name__ == "__main__":
     main()
