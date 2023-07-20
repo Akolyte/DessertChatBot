@@ -3,11 +3,8 @@ import requests
 import re
 from bs4 import BeautifulSoup
 
-#TODO: Get recipe directions
-#TODO: Write MongoDB
-
 def main():
-    recipe_dict = []
+    recipe_list = []
     with open('recipe_links.txt', 'r', encoding = "utf-8") as file:
         lines = file.readlines()
 
@@ -20,7 +17,7 @@ def main():
                 #{recipe name: {ingredients1: {} ,ingredients2: {} , directions: {}}}
                 recipe_title = find_recipe_title(soup).strip()
                 print(recipe_title)
-                recipe_dict.append(find_ingredients(soup,recipe_title))
+                recipe_list.append(find_ingredients(soup,recipe_title))
    
            
     file_path = "ingredients.json"
