@@ -7,7 +7,7 @@ def main():
     recipe_list = []
     with open('recipe_links.txt', 'r', encoding = "utf-8") as file:
         lines = file.readlines()
-
+        count = 0
         for line in lines:
             soup = cook_soup(line.strip())
             if not is_recipe(soup):
@@ -18,9 +18,11 @@ def main():
                 recipe_title = find_recipe_title(soup).strip()
                 print(recipe_title)
                 recipe_list.append(find_ingredients(soup,recipe_title))
-   
+            if count == 30:
+                break
+            count +=1
            
-    file_path = "ingredients.json"
+    file_path = "ingredients_test.json"
 
     # Open the file in write mode
     with open(file_path, "w") as json_file:
@@ -53,14 +55,14 @@ def find_recipe_title(soup):
 def find_ingredients(soup,recipe_title):
     class_pattern = re.compile(r'mntl-structured-ingredients__list-heading')
     subheadings = soup.find_all('p',class_=class_pattern)
-    
+    ingredients_dict = {}
     if subheadings:
-        ingredients_dict = find_ingredients_with_multiple_sub_recipes(soup,subheadings)
+        ingredients_dict["ingredients"] = find_ingredients_with_multiple_sub_recipes(soup,subheadings)
         
     else:
-        ingredients_dict = find_ingredients_with_one_recipe(soup)
-
-    ingredients_dict['name'] = recipe_title
+        ingredients_dict["ingredients"] = find_ingredients_with_one_recipe(soup)
+    ingredients_dict["instructions"] = find_instructions(soup)
+    ingredients_dict['recipe_name'] = recipe_title
     return ingredients_dict
 
 def find_ingredients_with_multiple_sub_recipes(soup,subheadings):
@@ -121,6 +123,14 @@ def get_ingredient_name(ingredient):
         return ingredient_name_span.text
     else:
         return None
+    
+def find_instructions(soup):
+    li_pattern = re.compile(r'comp mntl-sc-block-group--LI')
+    li_element = soup.find_all('li',class_ = li_pattern)
+    instructions_dict = {}
+    for index,element in enumerate(li_element):
+        instructions_dict[index] = element.text.strip()
+    return instructions_dict
 
 if __name__ == "__main__":
     main()

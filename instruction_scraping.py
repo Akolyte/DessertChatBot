@@ -7,16 +7,20 @@ def main():
     instructions_list = []
     with open('recipe_links.txt', 'r', encoding = "utf-8") as file:
         lines = file.readlines()
+        count = 0 
         for line in lines:
-            soup = cook_soup(line.strip())
+            soup = cook_soup(line.strip(),0)
             if not is_recipe(soup):
                 continue
             else:
                 recipe_title = find_recipe_title(soup).strip()
                 print(recipe_title)
                 instructions_list.append(find_instructions(soup,recipe_title))
-        
-    file_path = "ingredients.json"
+            if count == 10:
+                break
+            count += 1
+            
+    file_path = "instructions.json"
 
     # Open the file in write mode
     with open(file_path, "w") as json_file:
@@ -25,14 +29,20 @@ def main():
 
     print("Dictionary written to JSON file successfully.")
 
-def cook_soup(URL):
+def cook_soup(URL, request_limit):
     timeout = 10
+    if request_limit == 10:
+        print("Reached request limit")
+        return None
+    else:
+        request_limit += 1
     try:
         response = requests.get(URL, timeout=timeout)
         soup = BeautifulSoup(response.content, "html.parser")
         return soup
     except requests.exceptions.Timeout:
-        print(f"Request timed out after {timeout} seconds.")      
+        print(f"Request timed out after {timeout} seconds.")  
+        return cook_soup(URL, request_limit)    
     except requests.RequestException as e:
         print('Request failed:', str(e))
         return None
