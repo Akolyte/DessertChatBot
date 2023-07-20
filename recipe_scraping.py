@@ -7,7 +7,6 @@ def main():
     recipe_list = []
     with open('recipe_links.txt', 'r', encoding = "utf-8") as file:
         lines = file.readlines()
-        count = 0
         for line in lines:
             soup = cook_soup(line.strip())
             if not is_recipe(soup):
@@ -18,9 +17,6 @@ def main():
                 recipe_title = find_recipe_title(soup).strip()
                 print(recipe_title)
                 recipe_list.append(find_ingredients(soup,recipe_title))
-            if count == 15:
-                break
-            count +=1
            
     file_path = "ingredients_test.json"
 
