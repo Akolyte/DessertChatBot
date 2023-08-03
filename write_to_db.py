@@ -13,7 +13,7 @@ escaped_username = urllib.parse.quote(username)
 escaped_password = urllib.parse.quote(password)
 
 # Build the connection string
-connection_string = f"mongodb+srv://{escaped_username}:{escaped_password}@{host}/?connectTimeoutMS=120000"
+connection_string = f"mongodb+srv://{escaped_username}:{escaped_password}@{host}/?retryWrites=true&w=majority" 
 
 # Establish a connection to MongoDB
 client = MongoClient(connection_string)
@@ -29,11 +29,13 @@ collection = db[collection_name]
 with open('ingredients.json', 'r') as file:
     json_data = json.load(file)
 
+for json_obj in json_data:
+    result = collection.insert_one(json_obj)
 # Insert the JSON data into the collection
-result = collection.insert_one(json_data)
+
 
 # Print the inserted document IDs
-print('Inserted document IDs:', result.inserted_ids)
+print('Inserted document IDs:', result.inserted_id)
 
 # Close the connection to MongoDB
 client.close()
