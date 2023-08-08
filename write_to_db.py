@@ -1,41 +1,38 @@
 import json
 import urllib.parse
 from pymongo import MongoClient
-# MongoDB connection parameters
-host = 'dessert-chatbot-cluster.ulib92l.mongodb.net'
-port = 27017
-#database = 'Dessert-ChatBot-Cluster'
-username = 'hryoo2004'
-password = 'Ohironjoy@5413'
 
-# Escape the username and password
-escaped_username = urllib.parse.quote(username)
-escaped_password = urllib.parse.quote(password)
+def main():
+    dbname = get_database()
+    collection_name = dbname['ingredients']
 
-# Build the connection string
-connection_string = f"mongodb+srv://{escaped_username}:{escaped_password}@{host}/?retryWrites=true&w=majority" 
+    # Read the JSON file
+    with open('ingredients.json', 'r') as file:
+        json_data = json.load(file)
 
-# Establish a connection to MongoDB
-client = MongoClient(connection_string)
+    # Insert the JSON data into the collection
+    for json_obj in json_data:
+        result = collection_name.insert_one(json_obj)
 
-# Access a specific database
-db = client['Dessert-ChatBot-Cluster']
+        # Print the inserted document IDs
+        print('Inserted document IDs:', result.inserted_id)
 
-# Access a specific collection
-collection_name = 'ingredients'
-collection = db[collection_name]
+def get_database():
+    # MongoDB connection parameters
+    host = 'dessert-chatbot-cluster.ulib92l.mongodb.net'
+    username = 'hryoo2004'
+    password = 'gtl4D7iR1QkVz2ZS'
 
-# Read the JSON file
-with open('ingredients.json', 'r') as file:
-    json_data = json.load(file)
+    # Escape the username and password
+    escaped_username = urllib.parse.quote(username)
+    escaped_password = urllib.parse.quote(password)
 
-for json_obj in json_data:
-    result = collection.insert_one(json_obj)
-# Insert the JSON data into the collection
+    # Build the connection string
+    connection_string = f"mongodb+srv://{escaped_username}:{escaped_password}@{host}/?retryWrites=true&w=majority" 
 
+    # Establish a connection to MongoDB
+    client = MongoClient(connection_string)
+    return client['Dessert-ChatBot-Cluster']
 
-# Print the inserted document IDs
-print('Inserted document IDs:', result.inserted_id)
-
-# Close the connection to MongoDB
-client.close()
+if __name__ == '__main__':
+    main()
