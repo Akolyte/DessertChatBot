@@ -5,10 +5,8 @@ def main(recipe_name):
     dbname = get_database()
     collection = dbname['ingredients']
     query = {"recipe_name":recipe_name}
-    cursor = collection.find(query)
-    for document in cursor:
-        print(document)
-        break
+    result = collection.find_one(query)
+    print(result)
     
 def get_database():
     # MongoDB connection parameters
