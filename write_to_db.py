@@ -4,7 +4,7 @@ from pymongo import MongoClient
 
 def main():
     dbname = get_database()
-    collection_name = dbname['ingredients']
+    collection_name = dbname['recipes']
 
     # Read the JSON file
     with open('ingredients.json', 'r') as file:

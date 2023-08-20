@@ -3,10 +3,12 @@ from pymongo import MongoClient
 
 def main(recipe_name):
     dbname = get_database()
-    collection = dbname['ingredients']
+    collection = dbname['recipes']
     query = {"recipe_name":recipe_name}
     result = collection.find_one(query)
     print(result)
+    result['recipes']['ingredients']
+    result['recipes']['instructions']
     
 def get_database():
     # MongoDB connection parameters

@@ -14,7 +14,7 @@ def main():
             else:
                 #{recipe name: {ingredients: {} , directions: {}}}
                 #{recipe name: {ingredients1: {} ,ingredients2: {} , directions: {}}}
-                recipe_title = find_recipe_title(soup).strip()
+                recipe_title = re.sub(r'[^a-zA-Z0-9\s]', '', find_recipe_title(soup).strip().lower())
                 print(recipe_title)
                 recipe_list.append(find_ingredients(soup,recipe_title))
            
@@ -78,7 +78,7 @@ def find_ingredients_with_multiple_sub_recipes(soup,subheadings):
             ingredients_dict[index] = ingredients_part_dict
         
         if index_ul == 0:
-            sub_ingredients_dict['Ingredients'] = ingredients_dict
+            sub_ingredients_dict['ingredients'] = ingredients_dict
         else:
             sub_ingredients_dict[subheadings[index_ul-1].text] = ingredients_dict
 
