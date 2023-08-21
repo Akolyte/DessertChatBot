@@ -79,7 +79,7 @@ def find_ingredients_with_multiple_sub_recipes(soup,subheadings):
         if index_ul == 0:
             sub_ingredients_dict['ingredients'] = ingredients_dict
         else:
-            sub_ingredients_dict[subheadings[index_ul-1].text] = ingredients_dict
+            sub_ingredients_dict[subheadings[index_ul-1].text.lower()] = ingredients_dict
 
     return sub_ingredients_dict
 
@@ -94,7 +94,7 @@ def find_ingredients_with_one_recipe(soup):
         ingredients_part_dict = {}
         ingredients_part_dict['quantity'] = get_quantity(ingredient)
         ingredients_part_dict['unit'] = get_unit(ingredient)
-        ingredients_part_dict['ingredient_name'] = get_ingredient_name(ingredient)
+        ingredients_part_dict['ingredient_name'] = get_ingredient_name(ingredient).lower()
         ingredients_dict[index] = ingredients_part_dict
 
     return ingredients_dict

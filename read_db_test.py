@@ -9,7 +9,7 @@ def main(recipe_name):
     print(result)
     ingredients_dict = result['ingredients']['Ingredients']
     instructions_dict = result['instructions']
-    plain_text = "Ingredients:\n"
+    plain_text = "Ingredients:\n\n"
 
     for ingredient in ingredients_dict.values():
         quantity = ingredient['quantity']
@@ -17,8 +17,10 @@ def main(recipe_name):
         name = ingredient['ingredient_name']
         plain_text += f"{quantity} {unit} {name}\n"
 
-    for instruction in instructions_dict.values():
-        plain_text += f"{instruction}\n"
+    plain_text += "\nInstructions:\n\n"
+
+    for index, instruction in instructions_dict.items():
+        plain_text += f"{int(index) + 1}. {instruction}\n"
 
     print(plain_text)
     
