@@ -7,8 +7,20 @@ def main(recipe_name):
     query = {"recipe_name":recipe_name}
     result = collection.find_one(query)
     print(result)
-    result['recipes']['ingredients']
-    result['recipes']['instructions']
+    ingredients_dict = result['recipes']['ingredients']
+    instructions_dict = result['recipes']['instructions']
+    plain_text = "Ingredients:\n"
+
+    for ingredient in ingredients_dict.values():
+        quantity = ingredient['quantity']
+        unit = ingredient['unit']
+        name = ingredient['ingredient_name']
+        plain_text += f"{quantity} {unit} {name}\n"
+
+    for instruction in instructions_dict.values():
+        plain_text += f"{instruction}\n"
+
+    print(plain_text)
     
 def get_database():
     # MongoDB connection parameters
