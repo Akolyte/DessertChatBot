@@ -54,8 +54,7 @@ def find_ingredients(soup,recipe_title):
     subheadings = soup.find_all('p',class_=class_pattern)
     ingredients_dict = {}
     if subheadings:
-        ingredients_dict["ingredients"] = find_ingredients_with_multiple_sub_recipes(soup,subheadings)
-        
+        ingredients_dict["sub_recipes"] = find_ingredients_with_multiple_sub_recipes(soup,subheadings)
     else:
         ingredients_dict["ingredients"] = find_ingredients_with_one_recipe(soup)
     ingredients_dict["instructions"] = find_instructions(soup)

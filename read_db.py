@@ -3,12 +3,12 @@ from pymongo import MongoClient
 
 def main(recipe_name):
     dbname = get_database()
-    collection = dbname['recipes']
+    collection = dbname['ingredients']
     query = {"recipe_name":recipe_name}
     result = collection.find_one(query)
     print(result)
-    ingredients_dict = result['recipes']['ingredients']
-    instructions_dict = result['recipes']['instructions']
+    ingredients_dict = result['ingredients']['Ingredients']
+    instructions_dict = result['instructions']
     plain_text = "Ingredients:\n"
 
     for ingredient in ingredients_dict.values():
