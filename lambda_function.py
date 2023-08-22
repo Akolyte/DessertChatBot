@@ -4,17 +4,22 @@ from pymongo import MongoClient
 def lambda_handler(event, context):
     print('received request: ' + str(event))
     recipe_name_input = event["sessionState"]["intent"]["slots"]["RecipeName"]["value"]["originalValue"]
+    slots = event['sessionState']['intent']['slots']
     recipe = get_recipe_by_name(recipe_name_input)
     response = {
-        "dialogAction": {
-            "type": "Close",
-            "fulfillmentState": "Fulfilled",
-            "message": {
-                "contentType": "PlainText",
-                "content": f"{recipe}"
-                
+        "sessionState": {
+            "dialogAction": {
+                "type": "Close"
+            },
+            "intent": {
+                "name": "BookHotel",
+                "state": "Fulfilled"
             }
-        }
+        },
+        "messages": [{
+            "contentType": "PlainText",
+            "content": f"{recipe}"
+        }]
     }
 
     return response
