@@ -28,3 +28,13 @@ Issues:
 1.
   Problem: Recipe categories are nested, and are also repeated at different levels of nesting.
   Solution: Retain a set of recipe categories, and exit early if the recipe category has already been covered. 
+
+## Problem 2: Writing and Reading from MongoDB Collection
+
+## Problem 3: Configuring AWS Lambda functions to communicate with AWS Lex Chatbot
+
+### Problem 3a: Create intent to handle requests for specific recipes
+
+### Problem 3b: Create intent so that when prompted, the chatbot will return 3 random recipes and let the user pick one
+
+## Problem 4: Create frontend to host chatbot

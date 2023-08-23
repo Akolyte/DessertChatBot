@@ -14,11 +14,11 @@ def main():
             else:
                 #{recipe name: {ingredients: {} , directions: {}}}
                 #{recipe name: {ingredients1: {} ,ingredients2: {} , directions: {}}}
-                recipe_title = re.sub(r'[^a-zA-Z0-9\s]', '', find_recipe_title(soup).strip().lower()).replace(" ", "")
+                recipe_title = find_recipe_title(soup).strip()
                 print(recipe_title)
                 recipe_list.append(find_ingredients(soup,recipe_title))
            
-    file_path = "ingredients_test.json"
+    file_path = "ingredients.json"
 
     # Open the file in write mode
     with open(file_path, "w") as json_file:
@@ -58,6 +58,7 @@ def find_ingredients(soup,recipe_title):
     else:
         ingredients_dict["ingredients"] = find_ingredients_with_one_recipe(soup)
     ingredients_dict["instructions"] = find_instructions(soup)
+    ingredients_dict['recipe_name_interpreted_value'] = re.sub(r'[^a-zA-Z0-9\s]', '', recipe_title.strip().lower()).replace(" ", "")
     ingredients_dict['recipe_name'] = recipe_title
     return ingredients_dict
 
