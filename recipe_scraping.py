@@ -14,7 +14,7 @@ def main():
             else:
                 #{recipe name: {ingredients: {} , directions: {}}}
                 #{recipe name: {ingredients1: {} ,ingredients2: {} , directions: {}}}
-                recipe_title = re.sub(r'[^a-zA-Z0-9\s]', '', find_recipe_title(soup).strip().lower())
+                recipe_title = re.sub(r'[^a-zA-Z0-9\s]', '', find_recipe_title(soup).strip().lower()).replace(" ", "")
                 print(recipe_title)
                 recipe_list.append(find_ingredients(soup,recipe_title))
            
