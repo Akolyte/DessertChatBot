@@ -7,7 +7,7 @@ def main():
     collection_name = dbname['recipes']
 
     # Read the JSON file
-    with open('ingredients.json', 'r') as file:
+    with open('../web_scraping/ingredients.json', 'r') as file:
         json_data = json.load(file)
 
     # Insert the JSON data into the collection

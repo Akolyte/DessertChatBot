@@ -18,7 +18,7 @@ def main():
                 print(recipe_title)
                 recipe_list.append(find_ingredients(soup,recipe_title))
            
-    file_path = "ingredients.json"
+    file_path = "ingredients2.json"
 
     # Open the file in write mode
     with open(file_path, "w") as json_file:
