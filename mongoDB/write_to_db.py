@@ -16,6 +16,7 @@ def main():
 
         # Print the inserted document IDs
         print('Inserted document IDs:', result.inserted_id)
+    print("Done!")
 
 def get_database():
     # MongoDB connection parameters
