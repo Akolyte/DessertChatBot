@@ -2,12 +2,19 @@ import urllib.parse
 from pymongo import MongoClient
 
 def main(recipe_name):
+    print(get_recipe_by_name(recipe_name))
+
+def get_recipe_by_name(recipe_name):
     dbname = get_database()
-    collection = dbname['ingredients']
-    query = {"recipe_name":recipe_name}
+    collection = dbname['recipes']
+    query = {"recipe_name_interpreted_value":recipe_name}
     result = collection.find_one(query)
-    print(result)
-    ingredients_dict = result['ingredients']['Ingredients']
+    key = 'sub_recipes'
+    if key in result.keys():
+        ingredients_dict = result['sub_recipes']['ingredients']
+    else:
+        ingredients_dict = result['ingredients']
+    
     instructions_dict = result['instructions']
     plain_text = "Ingredients:\n\n"
 
@@ -15,14 +22,21 @@ def main(recipe_name):
         quantity = ingredient['quantity']
         unit = ingredient['unit']
         name = ingredient['ingredient_name']
-        plain_text += f"{quantity} {unit} {name}\n"
+        if unit is None and quantity is None:
+            plain_text += f"{name}\n"
+        elif unit is None:
+            plain_text += f"{quantity} {name}\n"
+        elif quantity is None:
+            plain_text += f"{unit} {name}\n"
+        else:
+            plain_text += f"{quantity} {unit} {name}\n"
 
     plain_text += "\nInstructions:\n\n"
 
     for index, instruction in instructions_dict.items():
         plain_text += f"{int(index) + 1}. {instruction}\n"
 
-    print(plain_text)
+    return plain_text
     
 def get_database():
     # MongoDB connection parameters
@@ -42,4 +56,4 @@ def get_database():
     return client['Dessert-ChatBot-Cluster']
 
 if __name__ == '__main__':
-    main("Rhubarb Cobbler")
+    main("banoffeepie")

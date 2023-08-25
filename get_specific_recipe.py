@@ -3,8 +3,7 @@ from pymongo import MongoClient
 
 def lambda_handler(event, context):
     print('received request: ' + str(event))
-    recipe_name_input = event["sessionState"]["intent"]["slots"]["RecipeName"]["value"]["originalValue"]
-    slots = event['sessionState']['intent']['slots']
+    recipe_name_input = event["sessionState"]["intent"]["slots"]["RecipeName"]["value"]["interpretedValue"]
     recipe = get_recipe_by_name(recipe_name_input)
     response = {
         "sessionState": {
@@ -12,7 +11,7 @@ def lambda_handler(event, context):
                 "type": "Close"
             },
             "intent": {
-                "name": "BookHotel",
+                "name": "GetRecipeByName",
                 "state": "Fulfilled"
             }
         },
@@ -26,11 +25,15 @@ def lambda_handler(event, context):
     
 def get_recipe_by_name(recipe_name):
     dbname = get_database()
-    collection = dbname['ingredients']
-    query = {"recipe_name":recipe_name}
+    collection = dbname['recipes']
+    query = {"recipe_name_interpreted_value":recipe_name}
     result = collection.find_one(query)
-    print(result)
-    ingredients_dict = result['ingredients']['Ingredients']
+    key = 'sub_recipes'
+    if key in result.keys():
+        ingredients_dict = result['sub_recipes']['ingredients']
+    else:
+        ingredients_dict = result['ingredients']
+    
     instructions_dict = result['instructions']
     plain_text = "Ingredients:\n\n"
 
@@ -38,7 +41,14 @@ def get_recipe_by_name(recipe_name):
         quantity = ingredient['quantity']
         unit = ingredient['unit']
         name = ingredient['ingredient_name']
-        plain_text += f"{quantity} {unit} {name}\n"
+        if unit is None and quantity is None:
+            plain_text += f"{name}\n"
+        elif unit is None:
+            plain_text += f"{quantity} {name}\n"
+        elif quantity is None:
+            plain_text += f"{unit} {name}\n"
+        else:
+            plain_text += f"{quantity} {unit} {name}\n"
 
     plain_text += "\nInstructions:\n\n"
 
