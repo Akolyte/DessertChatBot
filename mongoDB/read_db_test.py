@@ -1,8 +1,10 @@
 import urllib.parse
 from pymongo import MongoClient
+import random
 
 def main(recipe_name):
-    print(get_recipe_by_name(recipe_name))
+    # print(get_recipe_by_name(recipe_name))
+    print(get_random_recipe(recipe_name))
 
 def get_recipe_by_name(recipe_name):
     dbname = get_database()
@@ -37,6 +39,25 @@ def get_recipe_by_name(recipe_name):
         plain_text += f"{int(index) + 1}. {instruction}\n"
 
     return plain_text
+
+def get_random_recipe(recipe_name):
+    random_documents = []
+    dbname = get_database()
+    collection = dbname['recipes']
+
+    # Generate a random filter/query
+    total_documents = collection.count_documents({})
+    random_index = [random.randint(0, total_documents - 1) for _ in range(3)]
+    for i in random_index:
+        random_documents.append(collection.find().skip(i).limit(3)[0])
+
+    recipe_names = []
+    for recipe in random_documents:
+        interpreted_value = recipe["recipe_name_interpreted_value"]
+        recipe_name = recipe["recipe_name"]
+        recipe_names.append({"interpreted_value":interpreted_value, "recipe_name":recipe_name})
+
+    return recipe_names
     
 def get_database():
     # MongoDB connection parameters
