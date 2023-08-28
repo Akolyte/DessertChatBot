@@ -8,6 +8,7 @@ def lambda_handler(event, context):
     print(intent_name)
     if intent_name == "GetRecipeByName":
         recipe_name_input = event["sessionState"]["intent"]["slots"]["RecipeName"]["value"]["interpretedValue"]
+        # TODO Remove special characters from recipe_name_input
         recipe = get_recipe_by_name(recipe_name_input)
         response = {
             "sessionState": {
