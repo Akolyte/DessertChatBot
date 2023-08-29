@@ -12,7 +12,7 @@ def get_recipe_by_name(recipe_name):
     query = recipe_name
     result = collection.find_one(
     {"$text": {"$search": query}},
-    {"score": {"$meta": "textScore"}}).sort([("score", {"$meta": "textScore"})])
+    {"score": {"$meta": "textScore"}}).sort([("score", {"$meta": "textScore", "$metaTextSort": -1})])
 
     key = 'sub_recipes'
     if key in result.keys():
