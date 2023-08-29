@@ -1,6 +1,5 @@
-import urllib.parse
-from pymongo import MongoClient
 import random
+from database_util import get_database
 
 def main(recipe_name):
     # print(get_recipe_by_name(recipe_name))
@@ -58,23 +57,6 @@ def get_random_recipe(recipe_name):
         recipe_names.append({"interpreted_value":interpreted_value, "recipe_name":recipe_name})
 
     return recipe_names
-    
-def get_database():
-    # MongoDB connection parameters
-    host = 'dessert-chatbot-cluster.ulib92l.mongodb.net'
-    username = 'hryoo2004'
-    password = 'gtl4D7iR1QkVz2ZS'
-
-    # Escape the username and password
-    escaped_username = urllib.parse.quote(username)
-    escaped_password = urllib.parse.quote(password)
-
-    # Build the connection string
-    connection_string = f"mongodb+srv://{escaped_username}:{escaped_password}@{host}/?retryWrites=true&w=majority" 
-
-    # Establish a connection to MongoDB
-    client = MongoClient(connection_string)
-    return client['Dessert-ChatBot-Cluster']
 
 if __name__ == '__main__':
     main("banoffeepie")
