@@ -8,8 +8,12 @@ def main(recipe_name):
 def get_recipe_by_name(recipe_name):
     dbname = get_database()
     collection = dbname['recipes']
-    query = {"recipe_name_interpreted_value":recipe_name}
-    result = collection.find_one(query)
+    
+    query = recipe_name
+    result = collection.find_one(
+    {"$text": {"$search": query}},
+    {"score": {"$meta": "textScore"}}).sort([("score", {"$meta": "textScore"})])
+    
     key = 'sub_recipes'
     if key in result.keys():
         ingredients_dict = result['sub_recipes']['ingredients']
