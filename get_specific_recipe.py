@@ -1,6 +1,8 @@
 import urllib.parse
 from pymongo import MongoClient
 import random
+import json
+import difflib
 
 def lambda_handler(event, context):
     print('received request: ' + str(event))
@@ -8,6 +10,7 @@ def lambda_handler(event, context):
     print(intent_name)
     if intent_name == "GetRecipeByName":
         recipe_name_input = event["sessionState"]["intent"]["slots"]["RecipeName"]["value"]["interpretedValue"]
+        # TODO Remove special characters from recipe_name_input
         recipe = get_recipe_by_name(recipe_name_input)
         response = {
             "sessionState": {
@@ -49,14 +52,57 @@ def lambda_handler(event, context):
                 "content": f"{recipe_names_string}"
             }]
         }
-    
+
         return response
+    
+    elif intent_name == "FindSimilar":
+        print('recieved request: ' + str(event))
+        recipe_name_input = event["sessionState"]["intent"]["slots"]["RecipeName"]["value"]["interpretedValue"]
+        recipe = similarity_matching(recipe_name_input)
+        response = {
+            "sessionState": {
+                "dialogAction": {
+                    "type": "Close"
+                },
+                "intent": {
+                    "name": "FindSimilar",
+                    "state": "Fulfilled"
+                }
+            },
+            "messages": [{
+                "contentType": "PlainText",
+                "content": f"{recipe}"
+            }],
+            "card": {
+                "type": "Simple",
+                "title": "Similar1",
+                "content": recipe[0]
+            }
+        }
+
+        return response
+    
+def similarity_matching(recipe_name):
+    with open('ingredients.json', 'r') as json_file:
+        recipes = json.load(json_file)
+
+    intepreted_values_list = [recipe["recipe_name_interpreted_value"] for recipe in recipes]
+    close_matches = difflib.get_close_matches(recipe_name,intepreted_values_list, n=3)
+    close_match1 = close_matches[0]
+    close_match2 = close_matches[1]
+    close_match3 = close_matches[2]
+
+    return close_match1, close_match2, close_match3
     
 def get_recipe_by_name(recipe_name):
     dbname = get_database()
     collection = dbname['recipes']
-    query = {"recipe_name_interpreted_value":recipe_name}
-    result = collection.find_one(query)
+    query = recipe_name
+    
+    result = collection.find_one(
+    {"$text": {"$search": query}},
+    {"score": {"$meta": "textScore"}}).sort([("score", {"$meta": "textScore"})])
+
     key = 'sub_recipes'
     if key in result.keys():
         ingredients_dict = result['sub_recipes']['ingredients']
